@@ -16,7 +16,7 @@ from ..persistence.session import SessionManager
 from ..adapters.cosmic import COSMICWindowBackend
 from ..adapters.mock import MockWindowBackend
 
-app = typer.Typer(help="COSMIC Desktop Auto Workspace & Window Manager", add_completion=False)
+app = typer.Typer(help="Wayland-native session restore and workspace automation for COSMIC Desktop", add_completion=False)
 console = Console()
 
 def get_backend(dry_run: bool):
@@ -207,8 +207,8 @@ def autostart(
     if enable:
         content = """[Desktop Entry]
 Type=Application
-Name=COSMIC WM Manager
-Comment=Restores previous desktop session
+Name=cosmic-session-manager
+Comment=Restore saved COSMIC sessions and workspace layouts
 Exec=cosmic-wm restore default
 Icon=system-run
 Terminal=false

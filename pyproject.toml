@@ -1,7 +1,7 @@
 [project]
-name = "cosmic-wm-manager"
+name = "cosmic-session-manager"
 version = "0.1.0"
-description = "COSMIC Desktop Auto Workspace & Window Manager"
+description = "Wayland-native session restore and workspace automation for COSMIC Desktop"
 authors = [
     { name = "Antigravity Agent", email = "antigravity@deepmind.google.com" }
 ]
