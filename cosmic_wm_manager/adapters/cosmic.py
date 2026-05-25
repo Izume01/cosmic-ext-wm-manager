@@ -18,17 +18,15 @@ class COSMICWindowBackend(WindowBackend):
 
     def _find_cos_cli(self) -> str:
         """Locates the 'cos-cli' binary on the system."""
-        # Check standard path first
         path = shutil.which("cos-cli")
         if path:
             return path
         
-        # Check cargo bin fallback
         cargo_bin = os.path.expanduser("~/.cargo/bin/cos-cli")
         if os.path.exists(cargo_bin):
             return cargo_bin
             
-        return "cos-cli"  # Fallback to system name
+        return "cos-cli"
 
     async def _run_command(self, *args: str) -> Optional[str]:
         """Helper to execute cos-cli with arguments asynchronously."""
@@ -188,13 +186,11 @@ class COSMICWindowBackend(WindowBackend):
                 app_id = app.get("app_id") or app.get("name") or ""
                 idx = str(app.get("index", ""))
                 
-                # Fetch workspace index from nesting
                 app_workspaces = app.get("workspaces", [])
                 workspace_idx = 1
                 if app_workspaces:
                     workspace_idx = self._extract_workspace_number(app_workspaces[0])
 
-                # Parse window states (e.g. minimized, maximized, activated)
                 states = app.get("state", [])
                 is_active = "activated" in states
                 
@@ -266,7 +262,6 @@ class COSMICWindowBackend(WindowBackend):
 
     async def activate_window(self, window_id: str) -> bool:
         """Focuses the given application window."""
-        # Command: cos-cli activate -i <index>
         result = await self._run_command("activate", "-i", window_id)
         return result is not None
 
@@ -302,7 +297,6 @@ class COSMICWindowBackend(WindowBackend):
     async def switch_workspace(self, workspace_idx: int) -> bool:
         """Switch current view to the specified workspace."""
         cos_workspace_idx = max(0, workspace_idx - 1)
-        # Command: cos-cli ws-activate -w <workspace_index>
         result = await self._run_command("ws-activate", "-w", str(cos_workspace_idx))
         return result is not None
 

@@ -70,10 +70,9 @@ def _start_profile(path: str, dry_run: bool, timeout: float, debug: bool):
     if cfg.description:
         console.print(f"[dim]{cfg.description}[/dim]")
 
-    # Build global-workspace routing metadata from the profile config.
     workspace_routes = {}
     if cfg.monitors:
-        for w_idx in range(1, 20):  # Pre-resolve for up to 20 workspaces
+        for w_idx in range(1, 20):
             workspace_routes[w_idx] = cfg.resolve_workspace_output(w_idx)
 
     backend = get_backend(dry_run)
@@ -89,7 +88,6 @@ def _start_profile(path: str, dry_run: bool, timeout: float, debug: bool):
         )
         claimed_window_ids: Set[str] = set()
 
-        # Spawning apps
         for app_cfg in cfg.apps:
             existing_window = _find_existing_window_for_app(
                 app_cfg,
@@ -106,7 +104,6 @@ def _start_profile(path: str, dry_run: bool, timeout: float, debug: bool):
                 continue
             await launcher.launch(app_cfg.command)
 
-        # Retry Engine places windows dynamically
         await engine.arrange_windows(cfg.apps)
 
         if initial_workspace is not None:
@@ -122,14 +119,11 @@ def start(
     debug: bool = typer.Option(False, "--debug", help="Enable verbose debug printing")
 ):
     """Launches application profile and organizes windows onto workspaces."""
-    # Resolve path
     if os.path.exists(profile):
         path = profile
     else:
-        # Search in standard profiles
         path = os.path.expanduser(f"~/.config/cosmic-wm-manager/profiles/{profile}.yaml")
         if not os.path.exists(path):
-            # Check project profiles folder
             path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "profiles", f"{profile}.yaml")
             if not os.path.exists(path):
                 console.print(f"[bold red]✘ Profile not found: {profile}[/bold red]")
@@ -173,7 +167,6 @@ def status():
         windows = await backend.list_windows()
         workspaces = await backend.get_workspaces()
 
-        # Render Table
         table = Table(title="Active COSMIC Applications")
         table.add_column("Index", style="dim")
         table.add_column("App ID", style="cyan")

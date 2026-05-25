@@ -79,7 +79,6 @@ class RetryEngine:
         Polls the window list and moves windows matching configured apps to their workspaces.
         Returns True if all apps with match rules were successfully placed, False if timed out.
         """
-        # Filter apps that actually have matching rules
         apps_to_match = sorted(
             [(idx, app) for idx, app in enumerate(apps) if app.match is not None],
             key=lambda item: (item[1].workspace, item[0]),
@@ -90,8 +89,8 @@ class RetryEngine:
 
         self.console.log(f"[blue]🔍 Window retry engine active. Polling for {len(apps_to_match)} application window(s)...[/blue]")
         
-        placed_indices: Set[str] = set()  # Track window IDs already placed
-        matched_apps: Set[int] = set()    # Track indices of apps successfully placed
+        placed_indices: Set[str] = set()
+        matched_apps: Set[int] = set()
         
         elapsed = 0.0
         while elapsed < self.timeout:
@@ -123,7 +122,6 @@ class RetryEngine:
                     if win.id in placed_indices:
                         continue
 
-                    # If this window matches the app rule, place it
                     if self.matcher.matches(win, app.match):
                         matched_window = win
                         break
@@ -166,7 +164,6 @@ class RetryEngine:
             await asyncio.sleep(self.poll_interval)
             elapsed += self.poll_interval
 
-        # Timeout handling
         missing_apps = [app.command for app_idx, app in apps_to_match if app_idx not in matched_apps]
         self.console.log(
             f"[yellow]⚠ Timeout of {self.timeout}s reached. "

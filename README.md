@@ -166,6 +166,11 @@ Launcher still shows closed apps
 
 ## Development
 
+Additional docs:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Sessions and matching](docs/SESSIONS.md)
+
 Run tests with the project virtualenv:
 
 ```bash

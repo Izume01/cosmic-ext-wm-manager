@@ -1,18 +1,16 @@
 #!/bin/bash
 set -e
 
-# Colors for nice UI
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
 RED='\033[0;31m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 echo -e "${BLUE}===============================================${NC}"
 echo -e "${BLUE}   cosmic-session-manager Installer${NC}"
 echo -e "${BLUE}===============================================${NC}"
 
-# Check for Cargo / Rust
 if ! command -v cargo &> /dev/null; then
     echo -e "${YELLOW}⚠ Cargo (Rust) not found. Building cos-cli will be skipped.${NC}"
     echo -e "${YELLOW}Please install Rust using: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh${NC}"
@@ -26,7 +24,6 @@ else
     fi
 fi
 
-# Create python venv
 echo -e "${BLUE}Creating Python Virtual Environment...${NC}"
 python3 -m venv .venv
 
@@ -34,7 +31,6 @@ echo -e "${BLUE}Installing Python dependencies...${NC}"
 .venv/bin/pip install --upgrade pip
 .venv/bin/pip install -e .
 
-# Expose global launcher in local bin
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
@@ -45,11 +41,9 @@ exec "$(pwd)/.venv/bin/cosmic-wm" "\$@"
 EOF
 chmod +x "$LOCAL_BIN/cosmic-wm"
 
-# Create config folders
 mkdir -p "$HOME/.config/cosmic-wm-manager/profiles"
 mkdir -p "$HOME/.config/cosmic-wm-manager/sessions"
 
-# Copy sample profile
 cp profiles/dev.yaml "$HOME/.config/cosmic-wm-manager/profiles/dev.yaml"
 
 echo -e "${BLUE}===============================================${NC}"

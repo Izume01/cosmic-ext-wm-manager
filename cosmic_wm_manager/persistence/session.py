@@ -42,7 +42,6 @@ class SessionManager:
                         
                         has_matching_class = False
                         
-                        # 1. Match StartupWMClass
                         for line in content.splitlines():
                             if line.startswith("StartupWMClass="):
                                 wm_class = line.split("=", 1)[1].strip()
@@ -50,7 +49,6 @@ class SessionManager:
                                     has_matching_class = True
                                     break
                         
-                        # 2. Match App filename directly
                         if not has_matching_class and filename.lower() == f"{app_id.lower()}.desktop":
                             has_matching_class = True
                             
@@ -58,7 +56,6 @@ class SessionManager:
                             for line in content.splitlines():
                                 if line.startswith("Exec="):
                                     exec_val = line.split("=", 1)[1].strip()
-                                    # Strip arguments like %U, %F, %f, %u
                                     exec_val = re.sub(r'\s+%\w', '', exec_val)
                                     return exec_val
                     except Exception:
@@ -75,7 +72,6 @@ class SessionManager:
         if not app_id:
             return ""
 
-        # 1. Common Sandbox & Class overrides (e.g. Flatpaks, special executables)
         clean_app_id = app_id.lower()
         if "zen" in clean_app_id:
             return "flatpak run app.zen_browser.zen"
@@ -90,17 +86,13 @@ class SessionManager:
         if "alacritty" in clean_app_id:
             return "alacritty"
 
-        # 2. Check installed desktop launchers for matched Exec commands
         desktop_cmd = self._find_command_from_desktop_file(app_id)
         if desktop_cmd:
             return desktop_cmd
 
-        # 3. Check for Flatpak ID pattern
         if "." in app_id and not app_id.endswith(".exe"):
-            # Check if this is a standard reverse-dns flatpak application
             return f"flatpak run {app_id}"
 
-        # 4. Search psutil process tree as a fallback
         for proc in psutil.process_iter(["pid", "name", "cmdline"]):
             try:
                 p_name = (proc.info["name"] or "").lower()
@@ -109,14 +101,12 @@ class SessionManager:
                     continue
 
                 if clean_app_id in p_name or any(clean_app_id in str(arg).lower() for arg in cmdline):
-                    # Do not capture internal flatpak sandbox paths directly
                     if "/app/" in cmdline[0]:
                         continue
                     return " ".join(cmdline)
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
 
-        # Fallback to direct app_id
         return app_id
 
     async def save_session(self, session_name: str) -> Optional[str]:
@@ -139,7 +129,6 @@ class SessionManager:
             )
             apps_config = []
             for win in windows:
-                # Filter out system panels, status docks or empty IDs
                 if not win.app_id or win.app_id.startswith("cosmic-"):
                     continue
 
@@ -160,14 +149,12 @@ class SessionManager:
                 self.console.log("[yellow]⚠ No saveable applications identified.[/yellow]")
                 return None
 
-            # Build Profile Config
             profile = ProfileConfig(
                 name=session_name,
                 description=f"Snapshot captured dynamically on user request",
                 apps=apps_config
             )
 
-            # Save to disk
             filepath = os.path.join(self.sessions_dir, f"{session_name}.yaml")
             with open(filepath, "w") as f:
                 yaml.dump(profile.model_dump(by_alias=True, exclude_none=True), f, sort_keys=False)

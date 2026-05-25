@@ -48,7 +48,6 @@ class ProfileConfig(BaseModel):
         if not self.monitors:
             return "eDP-1", workspace_idx
 
-        # Sort monitors so the primary one is resolved first
         sorted_monitors = sorted(self.monitors, key=lambda m: not m.primary)
         
         current_offset = 0
@@ -58,7 +57,6 @@ class ProfileConfig(BaseModel):
                 return mon.output, local_idx
             current_offset += mon.workspace_count
             
-        # Fallback to the last monitor
         fallback_mon = sorted_monitors[-1]
         local_idx = max(1, workspace_idx - (current_offset - fallback_mon.workspace_count))
         return fallback_mon.output, local_idx

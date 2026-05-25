@@ -20,7 +20,6 @@ class AsyncAppLauncher:
         Asynchronously launch an application command in a detached shell.
         Returns the process ID (PID) if successfully launched.
         """
-        # Expand home directory in paths
         if cwd:
             cwd = os.path.expanduser(cwd)
         else:
@@ -31,8 +30,6 @@ class AsyncAppLauncher:
         self.console.log(f"[dim]Spawning process: {expanded_cmd} (Cwd: {cwd})[/dim]")
         
         try:
-            # We use preexec_fn=os.setsid to completely detach the process 
-            # from the parent terminal session, making sure it survives CLI exit.
             process = await asyncio.create_subprocess_shell(
                 expanded_cmd,
                 stdout=asyncio.subprocess.DEVNULL,
@@ -42,7 +39,6 @@ class AsyncAppLauncher:
                 preexec_fn=os.setsid if sys.platform != "win32" else None
             )
             
-            # Allow a tiny sleep to let the OS register the pid
             await asyncio.sleep(0.05)
             
             pid = process.pid
