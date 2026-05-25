@@ -1,0 +1,32 @@
+name: dev
+description: "Standard developer environment with terminals, editor, and browser"
+
+monitors:
+  - output: "eDP-1"
+    primary: true
+    workspace_count: 4
+
+apps:
+  - command: "kitty --title 'project-terminal'"
+    workspace: 1
+    match:
+      class: "kitty"
+      title: "project-terminal"
+    layout: "left"
+
+  - command: "code --new-window ~/projects"
+    workspace: 1
+    match:
+      class: "code"
+    layout: "right"
+
+  - command: "firefox --new-window https://github.com"
+    workspace: 2
+    match:
+      class: "firefox"
+      title: "GitHub"
+
+  - command: "slack"
+    workspace: 3
+    match:
+      class: "slack"
