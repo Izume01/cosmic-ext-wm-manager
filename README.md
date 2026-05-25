@@ -2,7 +2,6 @@
 
 Wayland-native session restore and workspace automation for COSMIC Desktop.
 
-The repository can be named `cosmic-vm-manager`, while the installed CLI remains `cosmic-wm`.
 
 ## What It Does
 
