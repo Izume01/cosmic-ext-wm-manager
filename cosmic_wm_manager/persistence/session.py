@@ -92,7 +92,13 @@ class SessionManager:
             return desktop_cmd
 
         if "." in app_id and not app_id.endswith(".exe"):
-            return f"flatpak run {app_id}"
+            # Check if this reverse-DNS ID is actually an installed Flatpak
+            user_flatpak_dir = os.path.expanduser("~/.local/share/flatpak/app")
+            system_flatpak_dir = "/var/lib/flatpak/app"
+            if os.path.isdir(os.path.join(user_flatpak_dir, app_id)) or \
+               os.path.isdir(os.path.join(system_flatpak_dir, app_id)):
+                return f"flatpak run {app_id}"
+
 
         for proc in psutil.process_iter(["pid", "name", "cmdline"]):
             try:
