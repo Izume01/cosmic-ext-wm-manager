@@ -1,7 +1,8 @@
-# cosmic-wm-manager
+# cosmic-wm-manager | COSMIC Desktop Workspace Manager & Session Restore
 
-Wayland-native session restore and workspace automation for the COSMIC Desktop.
+A Wayland-native session automation and workspace manager for the COSMIC Desktop environment. It helps you save, restore, and organize application window layouts dynamically across workspace groups and multiple monitors.
 
+Built specifically for the COSMIC Desktop on Wayland (Pop!_OS), it integrates with the native compositor interfaces via `cos-cli` to provide robust, lightweight window manager utility and session restore.
 
 ## What It Does
 
