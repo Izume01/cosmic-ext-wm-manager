@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Any
 from rich.console import Console
 from ..adapters.backend import WindowBackend, Window
 from ..config.schema import ProfileConfig, AppConfig, WindowMatchRule
+from ..utils.validation import check_command_exists
 
 class SessionManager:
     """
@@ -135,6 +136,13 @@ class SessionManager:
                 cmd = self._resolve_process_cmd(win.app_id, win.title)
                 if not cmd:
                     continue
+
+                # Validate if the captured command exists on system, warn if not
+                if not check_command_exists(cmd):
+                    self.console.log(
+                        f"[bold yellow]⚠ Warning: Captured command '{cmd}' (app_id: {win.app_id}) "
+                        f"is not installed/executable. Saving anyway, but verify before restoring.[/bold yellow]"
+                    )
 
                 apps_config.append(AppConfig(
                     command=cmd,

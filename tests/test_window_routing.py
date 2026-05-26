@@ -506,5 +506,71 @@ class SessionCaptureTests(unittest.IsolatedAsyncioTestCase):
         )
 
 
+    @patch("cosmic_wm_manager.cli.main.check_command_exists")
+    @patch("sys.stdin.isatty")
+    def test_non_interactive_skips_missing_apps(self, mock_isatty, mock_exists):
+        # Setup mocks
+        mock_isatty.return_value = False
+        # Let's say "kitty" is missing, "code" exists
+        mock_exists.side_effect = lambda cmd: cmd == "code"
+        
+        class MockBackend:
+            async def list_windows(self):
+                return []
+
+            async def get_workspaces(self):
+                return [Workspace(index=1, name="Workspace 1", output="eDP-1")]
+
+            async def switch_workspace(self, ws_idx):
+                return True
+
+        class MockLauncher:
+            def __init__(self, console=None):
+                self.launches = []
+
+            async def launch(self, cmd):
+                self.launches.append(cmd)
+                return 123
+
+        class MockEngine:
+            def __init__(self, backend, matcher, console, timeout, workspace_routes):
+                self.backend = backend
+                self.arranged = None
+
+            async def arrange_windows(self, apps):
+                MockEngine.arranged = apps
+                return True
+
+        backend = MockBackend()
+        launcher = MockLauncher()
+        
+        profile_content = {
+            "name": "test-profile",
+            "description": "Test profile auto skip",
+            "monitors": [],
+            "apps": [
+                {"command": "kitty", "workspace": 1, "match": {"class": "kitty"}},
+                {"command": "code", "workspace": 2, "match": {"class": "code"}}
+            ]
+        }
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = os.path.join(tmpdir, "test.yaml")
+            with open(path, "w") as f:
+                yaml.dump(profile_content, f)
+                
+            with patch("cosmic_wm_manager.cli.main.get_backend", return_value=backend), \
+                 patch("cosmic_wm_manager.cli.main.AsyncAppLauncher", side_effect=lambda console=None: launcher), \
+                 patch("cosmic_wm_manager.cli.main.RetryEngine", MockEngine):
+                 
+                cli_main._start_profile(path, dry_run=False, timeout=30.0, debug=False)
+                
+            # Verify only "code" was launched since "kitty" was missing
+            self.assertEqual(launcher.launches, ["code"])
+            # Verify "kitty" was skipped and not passed to arrangement engine
+            self.assertEqual(len(MockEngine.arranged), 1)
+            self.assertEqual(MockEngine.arranged[0].command, "code")
+
+
 if __name__ == "__main__":
     unittest.main()
