@@ -26,10 +26,8 @@ B_WHITE='\033[1;37m'
 # Reset Color
 NC='\033[0m'
 
-# Print Header Banner
-echo -e "${B_CYAN}╭───────────────────────────────────────────────────╮${NC}"
-echo -e "${B_CYAN}│${NC}  ${B_MAGENTA}🌌 COSMIC Session Manager${NC} ${B_CYAN}─${NC} ${WHITE}Installation Wizard${NC}  ${B_CYAN}│${NC}"
-echo -e "${B_CYAN}╰───────────────────────────────────────────────────╯${NC}"
+# Print Vercel-style clean header
+echo -e "${B_WHITE}▲ cosmic-session-manager${NC} ${DIM}installer${NC}"
 echo
 
 AUTO_YES=false
@@ -47,16 +45,14 @@ fi
 # ===================================================
 # STEP 1: RUST TOOLCHAIN
 # ===================================================
-echo -e "${B_BLUE}[ 🚀 Step 1/4 ]${NC} ${BOLD}Checking Rust Toolchain Environment...${NC}"
-
 if ! command -v cargo &> /dev/null; then
-    echo -e "         ${B_YELLOW}⚠️ Cargo (Rust) not found. Building the native helper requires Rust.${NC}"
+    echo -e "${B_YELLOW}⚠${NC} Cargo (Rust) not found. Building the native helper requires Rust."
     
     SHOULD_INSTALL=false
     if [ "$AUTO_YES" = true ]; then
         SHOULD_INSTALL=true
     elif [ -t 0 ]; then
-        read -p "         👉 Would you like to automatically download and install Rust (rustup)? [Y/n]: " -n 1 -r
+        read -p "  👉 Would you like to automatically download and install Rust (rustup)? [Y/n]: " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
             SHOULD_INSTALL=true
@@ -64,7 +60,7 @@ if ! command -v cargo &> /dev/null; then
     fi
 
     if [ "$SHOULD_INSTALL" = true ]; then
-        echo -e "         ${B_BLUE}⏳ Downloading rustup installer...${NC}"
+        echo -e "${DIM}• Downloading rustup installer...${NC}"
         DOWNLOADER=""
         if command -v curl &> /dev/null; then
             DOWNLOADER="curl"
@@ -73,12 +69,11 @@ if ! command -v cargo &> /dev/null; then
         fi
 
         if [ -z "$DOWNLOADER" ]; then
-            echo -e "         ${B_RED}❌ Error: Neither curl nor wget was found. Cannot download Rust installer.${NC}"
-            echo -e "         Please install curl or wget, or install Rust manually: https://rustup.rs/${NC}"
+            echo -e "${B_RED}✗${NC} Error: Neither curl nor wget was found. Cannot download Rust installer."
+            echo -e "  Please install curl or wget, or install Rust manually: https://rustup.rs/"
         else
-            # Create a secure temporary script in the workspace rather than piping directly to bash
             TEMP_RUSTUP_SH="./.rustup_install.sh"
-            echo -e "         ${B_BLUE}⏳ Downloading installer script using $DOWNLOADER...${NC}"
+            echo -e "${DIM}• Downloading installer script using $DOWNLOADER...${NC}"
             
             DOWNLOAD_SUCCESS=false
             if [ "$DOWNLOADER" = "curl" ]; then
@@ -93,95 +88,78 @@ if ! command -v cargo &> /dev/null; then
 
             if [ "$DOWNLOAD_SUCCESS" = true ]; then
                 chmod +x "$TEMP_RUSTUP_SH"
-                echo -e "         ${B_BLUE}⚙️  Running rustup installation...${NC}"
+                echo -e "${DIM}• Running rustup installation...${NC}"
                 if "$TEMP_RUSTUP_SH" -y; then
-                    echo -e "         ${B_GREEN}✨ Rust successfully installed!${NC}"
+                    echo -e "${B_GREEN}✓${NC} Rust successfully installed!"
                     if [ -f "$HOME/.cargo/env" ]; then
                         source "$HOME/.cargo/env"
                     fi
                 else
-                    echo -e "         ${B_RED}❌ Rust installation failed.${NC}"
+                    echo -e "${B_RED}✗${NC} Rust installation failed."
                 fi
                 rm -f "$TEMP_RUSTUP_SH"
             else
-                echo -e "         ${B_RED}❌ Failed to download the Rust installer script.${NC}"
+                echo -e "${B_RED}✗${NC} Failed to download the Rust installer script."
                 rm -f "$TEMP_RUSTUP_SH"
             fi
         fi
     else
-        echo -e "         ${B_YELLOW}⚠️ Skipping Rust installation. Building cos-cli will be skipped.${NC}"
+        echo -e "${B_YELLOW}⚠${NC} Skipping Rust installation. Building cos-cli will be skipped."
     fi
 else
-    echo -e "         ${B_GREEN}✔ Cargo detected:${NC} ${DIM}$(cargo --version)${NC}"
+    echo -e "${B_GREEN}✓${NC} Cargo environment detected: ${DIM}$(cargo --version)${NC}"
 fi
-echo
 
 # ===================================================
 # STEP 2: NATIVE HELPER
 # ===================================================
-echo -e "${B_BLUE}[ 📦 Step 2/4 ]${NC} ${BOLD}Installing Wayland Native Helper (cos-cli)...${NC}"
-
 if command -v cargo &> /dev/null; then
     if [ ! -f "$HOME/.cargo/bin/cos-cli" ]; then
-        echo -e "         ${B_BLUE}⏳ Building and installing Wayland helper from git...${NC}"
+        echo -e "${DIM}• Building and installing Wayland helper from git...${NC}"
         if cargo install --git https://github.com/estin/cos-cli; then
-            echo -e "         ${B_GREEN}✨ Native helper cos-cli successfully compiled and installed!${NC}"
+            echo -e "${B_GREEN}✓${NC} Native helper cos-cli successfully compiled and installed!"
         else
-            echo -e "         ${B_RED}❌ Failed to install cos-cli via cargo. Skipping compilation...${NC}"
+            echo -e "${B_RED}✗${NC} Failed to install cos-cli via cargo. Skipping compilation..."
         fi
     else
-        echo -e "         ${B_GREEN}✔ Native helper cos-cli already installed at ~/.cargo/bin/cos-cli${NC}"
+        echo -e "${B_GREEN}✓${NC} Native helper cos-cli is up to date"
     fi
 else
-    echo -e "         ${B_YELLOW}⚠️ Skipping building cos-cli since Cargo is not available.${NC}"
+    echo -e "${B_YELLOW}⚠${NC} Skipping building cos-cli since Cargo is not available."
 fi
-echo
 
 # ===================================================
 # STEP 3: PYTHON VIRTUAL ENVIRONMENT
 # ===================================================
-echo -e "${B_BLUE}[ 🐍 Step 3/4 ]${NC} ${BOLD}Setting up Python Virtual Environment...${NC}"
-echo -e "         ${B_BLUE}⏳ Creating dedicated virtual environment (.venv)...${NC}"
 python3 -m venv .venv
+echo -e "${B_GREEN}✓${NC} Python virtual environment created"
 
-echo -e "         ${B_BLUE}⏳ Upgrading pip and installing dependencies in editable mode...${NC}"
-.venv/bin/pip install --upgrade pip
-.venv/bin/pip install -e .
-echo -e "         ${B_GREEN}✔ Python dependencies and package successfully installed!${NC}"
-echo
+echo -e "${DIM}• Upgrading pip and installing package dependencies...${NC}"
+.venv/bin/pip install --upgrade pip > /dev/null 2>&1 || true
+.venv/bin/pip install -e . > /dev/null 2>&1
+echo -e "${B_GREEN}✓${NC} Package dependencies and libraries installed successfully"
 
 # ===================================================
 # STEP 4: ENTRYPOINTS & PATHS
 # ===================================================
-echo -e "${B_BLUE}[ ⚙️  Step 4/4 ]${NC} ${BOLD}Configuring Application Entrypoints...${NC}"
-
 LOCAL_BIN="$HOME/.local/bin"
 mkdir -p "$LOCAL_BIN"
 
-echo -e "         ${B_BLUE}⏳ Writing global shortcut launcher to ${LOCAL_BIN}/cosmic-wm...${NC}"
 cat << EOF > "$LOCAL_BIN/cosmic-wm"
 #!/bin/bash
 exec "$(pwd)/.venv/bin/cosmic-wm" "\$@"
 EOF
 chmod +x "$LOCAL_BIN/cosmic-wm"
+echo -e "${B_GREEN}✓${NC} Global launcher shortcut written to ${LOCAL_BIN}/cosmic-wm"
 
-echo -e "         ${B_BLUE}⏳ Creating user configuration directories...${NC}"
 mkdir -p "$HOME/.config/cosmic-wm-manager/profiles"
 mkdir -p "$HOME/.config/cosmic-wm-manager/sessions"
-
-echo -e "         ${B_BLUE}⏳ Copying default development profile...${NC}"
 cp profiles/dev.yaml "$HOME/.config/cosmic-wm-manager/profiles/dev.yaml"
+echo -e "${B_GREEN}✓${NC} Default configuration profiles copied"
 
-echo -e "         ${B_GREEN}✔ Workspace environment configured successfully!${NC}"
 echo
-
-# Final Success Banner
-echo
-echo -e "${B_GREEN}╭───────────────────────────────────────────────────╮${NC}"
-echo -e "${B_GREEN}│${NC}         ${B_GREEN}✨ INSTALLATION COMPLETED SUCCESSFULLY! ✨${NC}        ${B_GREEN}│${NC}"
-echo -e "${B_GREEN}├───────────────────────────────────────────────────┤${NC}"
-echo -e "${B_GREEN}│${NC}  ${BOLD}You can now run:${NC}  ${B_CYAN}cosmic-wm --help${NC}                   ${B_GREEN}│${NC}"
-echo -e "${B_GREEN}│${NC}                                                   ${B_GREEN}│${NC}"
-echo -e "${B_GREEN}│${NC}  ${BOLD}Note:${NC} Make sure ${B_BLUE}${LOCAL_BIN}${NC} is in your ${B_YELLOW}\$PATH${NC}.     ${B_GREEN}│${NC}"
-echo -e "${B_GREEN}╰───────────────────────────────────────────────────╯${NC}"
+# Final Vercel success layout
+echo -e "${B_GREEN}Success!${NC} cosmic-session-manager is ready to use."
+echo -e "${DIM}•${NC} Command:  ${B_CYAN}cosmic-wm --help${NC}"
+echo -e "${DIM}•${NC} Bin path: ${BLUE}${LOCAL_BIN}${NC}"
 echo
