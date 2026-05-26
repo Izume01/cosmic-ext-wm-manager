@@ -1,6 +1,6 @@
-# cosmic-vm-manager
+# cosmic-wm-manager
 
-Wayland-native session restore and workspace automation for COSMIC Desktop.
+Wayland-native session restore and workspace automation for the COSMIC Desktop.
 
 
 ## What It Does
@@ -25,13 +25,17 @@ It is built for COSMIC Desktop on Wayland and uses `cos-cli` to talk to the comp
 
 ## Installation
 
-Prerequisites:
+### Prerequisites
 
-- Pop!_OS / COSMIC Desktop on Wayland
-- Python 3.11+
-- Rust toolchain for building `cos-cli`
+- **OS**: Pop!_OS / COSMIC Desktop on Wayland
+- **Python**: Python 3.11+
+- **Rust**: Rust toolchain (required to build the native Wayland helper `cos-cli`).
+  > [!NOTE]
+  > Don't have Rust installed? The installer script (`install.sh`) will automatically detect this and offer to securely download and install it for you during setup.
 
-Install:
+### Setup
+
+Clone the repository and run the installer script:
 
 ```bash
 git clone git@github.com:Izume01/cosmic-wm-manager.git cosmic-session-manager
@@ -39,14 +43,15 @@ cd cosmic-session-manager
 ./install.sh
 ```
 
-That script:
+The installer script automatically handles:
+- **Rust Toolchain**: Checks for and (optionally) installs Rust/Cargo.
+- **Wayland Native Helper**: Builds or updates `cos-cli` to enable communication with the COSMIC compositor.
+- **Python Environment**: Creates a dedicated `.venv` virtual environment and upgrades pip.
+- **Package Installation**: Installs `cosmic-session-manager` in editable development mode.
+- **Global Launcher**: Writes a global shortcut launcher to `~/.local/bin/cosmic-wm`.
 
-- builds or reuses `cos-cli`
-- creates `.venv`
-- installs the package in editable mode
-- writes `~/.local/bin/cosmic-wm`
-
-Make sure `~/.local/bin` is on your `PATH`.
+> [!IMPORTANT]
+> Make sure `~/.local/bin` is in your system's `$PATH` variable so you can run the `cosmic-wm` commands from anywhere!
 
 ## Usage
 
