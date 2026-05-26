@@ -37,9 +37,8 @@ It is built for COSMIC Desktop on Wayland and uses `cos-cli` to talk to the comp
 ### Setup
 
 Clone the repository and run the installer script:
-
 ```bash
-git clone git@github.com:Izume01/cosmic-wm-manager.git cosmic-session-manager
+git clone git@github.com:Izume01/cosmic-ext-wm-manager.git cosmic-session-manager
 cd cosmic-session-manager
 ./install.sh
 ```
